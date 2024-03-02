@@ -8,3 +8,5 @@ pubspec.lock
 
 example
 .vscode
+
+/test/test_config.yaml

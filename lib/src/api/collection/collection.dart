@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 
 import 'package:modak/src/api/auth/auth.dart';
 import 'package:modak/src/api/endpoint.dart';
-import 'package:modak/src/api/request.dart';
 
 import 'collection_dto.dart';
 
@@ -27,28 +25,16 @@ class CollectionAPI {
   }
 
   Future<String> postCollection(String imagePath, Collection collection) async {
-    final client = http.MultipartRequest(
-        'post',
-        Uri.parse(
-          "${endpoint.baseurl}/collection",
-        ));
-
+    var multipatFiles = <http.MultipartFile>[];
     final jsonData = json.encode(collection.toJson());
-    final jsonObj = http.MultipartFile.fromString('info', jsonData,
-        contentType: MediaType('applicaton', 'json'));
-    client.files.add(jsonObj);
+    multipatFiles.add(http.MultipartFile.fromString('info', jsonData));
 
     final imageFile = await http.MultipartFile.fromPath('image', imagePath);
-    client.files.add(imageFile);
-    final streamResponse = await client.send();
-
-    final res = await http.Response.fromStream(streamResponse);
-    final jsonBody = json.decode(res.body);
-    if (streamResponse.statusCode == 401) {
-      throw AuthenticationError(jsonBody["message"]);
-    } else if (streamResponse.statusCode != 200) {
-      throw Exception("status code: ${streamResponse.statusCode}, ${res.body}");
-    }
-    return jsonBody["uuid"];
+    multipatFiles.add(imageFile);
+    final uuid = await auth.multipart<String, dynamic>(
+        "${endpoint.baseurl}/collection/",
+        (json) => json?["uuid"] ?? "",
+        multipatFiles);
+    return uuid;
   }
 }

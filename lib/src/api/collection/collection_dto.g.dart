@@ -34,12 +34,21 @@ Map<String, dynamic> _$CollectionsUUIDToJson(CollectionsUUID instance) =>
 Collection _$CollectionFromJson(Map<String, dynamic> json) => Collection(
       json['index'] as int,
       GeoLocation.fromJson(json['geolocation'] as Map<String, dynamic>),
-      Collection._dateFromJson(json['datetime'] as String),
+      Collection._dateFromJson(json['datetime'] as String?),
     );
 
-Map<String, dynamic> _$CollectionToJson(Collection instance) =>
-    <String, dynamic>{
-      'index': instance.index,
-      'geolocation': instance.geolocation.toJson(),
-      'datetime': Collection._dateToJson(instance.datetime),
-    };
+Map<String, dynamic> _$CollectionToJson(Collection instance) {
+  final val = <String, dynamic>{
+    'index': instance.index,
+    'geolocation': instance.geolocation.toJson(),
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('datetime', Collection._dateToJson(instance.datetime));
+  return val;
+}

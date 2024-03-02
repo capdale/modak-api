@@ -24,18 +24,19 @@ class CollectionsUUID {
   Map<String, dynamic> toJson() => _$CollectionsUUIDToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class Collection {
   final int index;
   final GeoLocation geolocation;
   @JsonKey(fromJson: _dateFromJson, toJson: _dateToJson)
-  final DateTime datetime;
+  final DateTime? datetime;
 
   Collection(this.index, this.geolocation, this.datetime);
   factory Collection.fromJson(Map<String, dynamic> json) =>
       _$CollectionFromJson(json);
   Map<String, dynamic> toJson() => _$CollectionToJson(this);
 
-  static DateTime _dateFromJson(String timestamp) => DateTime.parse(timestamp);
-  static String _dateToJson(DateTime time) => time.toIso8601String();
+  static DateTime? _dateFromJson(String? timestamp) =>
+      timestamp == null ? null : DateTime.parse(timestamp);
+  static String? _dateToJson(DateTime? time) => time?.toIso8601String();
 }
