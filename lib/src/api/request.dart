@@ -1,21 +1,27 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:modak/modak.dart';
-import 'package:modak/src/api/auth/auth.dart';
+
+class APIResponse<T> {
+  T data;
+  int statusCode;
+  APIResponse(this.data, this.statusCode);
+}
 
 abstract interface class IAPIRequest {
-  Future<T> get<T, G>(String url, T Function(G json) task,
+  Future<APIResponse<T>> get<T>(String url, T Function(http.Response res) task,
       {Map<String, String>? headers});
-  Future<T> post<T, G>(String url, T Function(G json) task,
+  Future<APIResponse<T>> post<T>(String url, T Function(http.Response res) task,
       {Object? body, Map<String, String>? headers});
-  Future<T> multipart<T, G>(
-      String url, T Function(G json) task, List<http.MultipartFile> files);
+  Future<APIResponse<T>> multipart<T>(String url,
+      T Function(http.Response res) task, List<http.MultipartFile> files);
+  Future<APIResponse<String>> delete(String url,
+      {Object? body, Map<String, String>? headers});
 }
 
 class AuthenticationError implements Exception {
-  final String message;
-  AuthenticationError(this.message);
+  final http.Response response;
+  AuthenticationError(this.response);
 }
 
 class RequestAPIError implements Exception {
@@ -28,60 +34,38 @@ class APIRequest implements IAPIRequest {
   APIRequest._init();
   static final APIRequest _instance = APIRequest._init();
   factory APIRequest() => _instance;
-  Future<T> getWithToken<T, G>(String url, T Function(G json) task, Token token,
-      {Map<String, String>? headers}) async {
-    final reqheaders = addTokenHeader(token, header: headers);
-    try {
-      return await get(url, task, headers: reqheaders);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<T> postWithToken<T, G>(
-      String url, T Function(G json) task, Token token,
-      {Object? body, Map<String, String>? headers}) async {
-    final reqheaders = addTokenHeader(token, header: headers);
-    try {
-      return await post(url, task, body: body, headers: reqheaders);
-    } catch (e) {
-      rethrow;
-    }
-  }
 
   @override
-  Future<T> get<T, G>(String url, T Function(G json) task,
+  Future<APIResponse<T>> get<T>(String url, T Function(http.Response res) task,
       {Map<String, String>? headers}) async {
     final res = await http.get(Uri.parse(url), headers: headers);
-    final j = json.decode(res.body);
     switch (res.statusCode) {
       case 200:
-        return task(j);
+        return APIResponse(task(res), res.statusCode);
       case 401:
-        throw AuthenticationError(j["message"]);
+        throw AuthenticationError(res);
       default:
         throw RequestAPIError(res.statusCode, res.body);
     }
   }
 
   @override
-  Future<T> post<T, G>(String url, T Function(G json) task,
+  Future<APIResponse<T>> post<T>(String url, T Function(http.Response res) task,
       {Object? body, Map<String, String>? headers}) async {
     final res = await http.post(Uri.parse(url), headers: headers, body: body);
-    final j = json.decode(res.body);
     switch (res.statusCode) {
       case 200:
-        return task(j);
+        return APIResponse(task(res), res.statusCode);
       case 401:
-        throw AuthenticationError(j["message"]);
+        throw AuthenticationError(res);
       default:
         throw RequestAPIError(res.statusCode, res.body);
     }
   }
 
   @override
-  Future<T> multipart<T, G>(
-      String url, T Function(G json) task, List<http.MultipartFile> files,
+  Future<APIResponse<T>> multipart<T>(String url,
+      T Function(http.Response res) task, List<http.MultipartFile> files,
       {Map<String, String>? headers}) async {
     final client = http.MultipartRequest('post', Uri.parse(url));
     if (headers != null) {
@@ -90,14 +74,32 @@ class APIRequest implements IAPIRequest {
     client.files.addAll(files);
     final streamResponse = await client.send();
     final res = await http.Response.fromStream(streamResponse);
-    final j = json.decode(res.body);
     switch (streamResponse.statusCode) {
       case 200:
-        return task(j);
+        return APIResponse(task(res), res.statusCode);
       case 401:
-        throw AuthenticationError(j["message"]);
+        throw AuthenticationError(res);
       default:
         throw RequestAPIError(res.statusCode, res.body);
     }
   }
+
+  @override
+  Future<APIResponse<String>> delete(String url,
+      {Object? body, Map<String, String>? headers}) async {
+    final res = await http.delete(Uri.parse(url), headers: headers, body: body);
+    switch (res.statusCode) {
+      case 200 || 204:
+        return APIResponse(res.body, res.statusCode);
+      case 401:
+        throw AuthenticationError(res);
+      default:
+        throw RequestAPIError(res.statusCode, res.body);
+    }
+  }
+}
+
+T Function(http.Response response) responseJsonWrapper<T>(
+    T Function(Map<String, dynamic> json) task) {
+  return (http.Response response) => task(json.decode(response.body));
 }

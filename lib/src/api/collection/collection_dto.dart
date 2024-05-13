@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:modak/src/types/uuid.dart';
 
 part 'collection_dto.g.dart';
 
@@ -17,7 +18,7 @@ class GeoLocation {
 
 @JsonSerializable()
 class CollectionsUUID {
-  final List<String> collections;
+  final List<UUID> collections;
   CollectionsUUID(this.collections);
   factory CollectionsUUID.fromJson(Map<String, dynamic> json) =>
       _$CollectionsUUIDFromJson(json);

@@ -4,16 +4,19 @@ port: 1234
 # universally use this token when need authentication
 access_token: "access token"
 refresh_token: "refresh token"
+uuid: "uuid"
 
 tests:
   auth:
     invalid_token:
       - "INVALID TOKEN"
       - "invalid_token"
-      - "invalidToken"
     no_uuid_token:
-      - "invalid.token"
-      - "INVALID.TOKEN"
+      - "eyJleHAiOjk5MDAwMDAwMDB9.signature"
+    expired_token:
+      - "eyJ1c2VyIjoidXVpZCIsImV4cCI6MTcwOTQwMjYyNn0.signature"
+    not_expired_token:
+      - "eyJ1c2VyIjoidXVpZCIsImV4cCI6OTkwMDAwMDAwMH0.signature"
 
   collection:
     collectionUUID: "collection uuid"

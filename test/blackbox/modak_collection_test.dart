@@ -14,15 +14,19 @@ void main() {
     testCollectionUUID = config.test.collection.collectionUUID;
   });
 
-  group('collection test', () {
-    test('get collection list test', () async {
-      await m.collection.getCollectionsUUID(0, 100);
+  group('collection', () {
+    test('get collection list', () async {
+      await m.collection.getCollectionsUUID("", 0, 100);
     });
-    test('post collection test', () async {
+    test('post collection', () async {
       final collection = Collection(1, GeoLocation(1, 1, 1, 1), null);
       await m.collection.postCollection("./test/assets/test.jpg", collection);
+
+      final defaultCollection = Collection(0, GeoLocation(0, 0, 0, 0), null);
+      await m.collection
+          .postCollection("./test/assets/test.jpg", defaultCollection);
     });
-    test('get collection test', () async {
+    test('get collection', () async {
       await m.collection.getCollectionByUUID(testCollectionUUID);
     });
   });

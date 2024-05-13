@@ -23,7 +23,9 @@ Map<String, dynamic> _$GeoLocationToJson(GeoLocation instance) =>
 
 CollectionsUUID _$CollectionsUUIDFromJson(Map<String, dynamic> json) =>
     CollectionsUUID(
-      (json['collections'] as List<dynamic>).map((e) => e as String).toList(),
+      (json['collections'] as List<dynamic>)
+          .map((e) => UUID.fromJson(e as String))
+          .toList(),
     );
 
 Map<String, dynamic> _$CollectionsUUIDToJson(CollectionsUUID instance) =>
@@ -32,7 +34,7 @@ Map<String, dynamic> _$CollectionsUUIDToJson(CollectionsUUID instance) =>
     };
 
 Collection _$CollectionFromJson(Map<String, dynamic> json) => Collection(
-      json['index'] as int,
+      (json['index'] as num).toInt(),
       GeoLocation.fromJson(json['geolocation'] as Map<String, dynamic>),
       Collection._dateFromJson(json['datetime'] as String?),
     );

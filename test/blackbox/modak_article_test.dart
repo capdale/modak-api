@@ -17,8 +17,9 @@ void main() {
     link = config.test.article.link;
   });
   group('article', () {
+    // fail test
     test('get article links', () async {
-      doing() async => await m.article.getLinksByUserUUID(m.token.uuid);
+      doing() async => await m.article.getLinksByUserUUID("username");
       final expected = returnsNormally;
 
       expect(doing, expected);

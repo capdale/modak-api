@@ -1,0 +1,21 @@
+name: Test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  bulid:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up dart
+        uses: dart-lang/setup-dart@v1.6.4
+        with:
+          architecture: x64
+
+      - name: Test api (exclude blackbox)
+        run: dart test test/api --reporter=github

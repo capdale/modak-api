@@ -7,24 +7,16 @@ import 'setup.dart';
 
 void main() {
   late String accessToken;
-  late Endpoint endpoint;
 
   setUp(() {
     final config = loadTestConfig();
-
     accessToken = config.accessToken;
-    endpoint = Endpoint(host: config.host, port: config.port);
   });
 
   group('token', () {
     test('valid token', () {
-      doing() => Modak(
-          token: Token.parseFromString(accessToken),
-          refreshToken: "",
-          endpoint: endpoint);
-
+      doing() => Token.parseFromString(accessToken);
       final expected = returnsNormally;
-
       expect(doing, expected);
     });
   });
@@ -34,10 +26,7 @@ void main() {
         .having((p0) => p0.cause, 'invalid token', 'invalid token string'));
     void checkTokenInvalid(String invalidToken, Matcher matcher) {
       test("- $invalidToken", () {
-        doing() => Modak(
-            token: Token.parseFromString(invalidToken),
-            refreshToken: "",
-            endpoint: endpoint);
+        doing() => Token.parseFromString(invalidToken);
         expect(doing, matcher);
       });
     }
@@ -54,10 +43,7 @@ void main() {
         .having((p0) => p0.cause, 'invalid token', 'no uuid'));
     void checkNoUUIDToken(String noUUIDToken, Matcher matcher) {
       test("no uuid token $noUUIDToken", () {
-        doing() => Modak(
-            token: Token.parseFromString(noUUIDToken),
-            refreshToken: "",
-            endpoint: endpoint);
+        doing() => Token.parseFromString(noUUIDToken);
         expect(doing, matcher);
       });
     }
@@ -65,6 +51,34 @@ void main() {
     final config = loadTestConfig();
     for (var token in config.test.auth.noUUIDTokens) {
       checkNoUUIDToken(token, expected);
+    }
+  });
+
+  group('expired token', () {
+    void checkExpiredToken(String expiredToken) {
+      test(expiredToken, () {
+        final isExpired = Token.parseFromString(expiredToken).isExpired();
+        expect(isExpired, true);
+      });
+    }
+
+    final config = loadTestConfig();
+    for (var token in config.test.auth.expiredTokens) {
+      checkExpiredToken(token);
+    }
+  });
+
+  group('not expired token', () {
+    void checkNotExpiredToken(String notExpiredToken) {
+      test(notExpiredToken, () {
+        final isExpired = Token.parseFromString(notExpiredToken).isExpired();
+        expect(isExpired, false);
+      });
+    }
+
+    final config = loadTestConfig();
+    for (var token in config.test.auth.notExpiredToken) {
+      checkNotExpiredToken(token);
     }
   });
 }

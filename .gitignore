@@ -9,4 +9,8 @@ pubspec.lock
 example
 .vscode
 
+# test config file
 /test/test_config.yaml
+
+# test coverage
+/coverage/*

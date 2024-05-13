@@ -1,0 +1,41 @@
+host: "localhost"
+port: 8080
+
+# universally use this token when need authentication
+access_token: "access token"
+refresh_token: "refresh token"
+uuid: "uuid"
+
+tests:
+  auth:
+    invalid_token:
+      - "INVALID TOKEN"
+      - "invalid_token"
+    no_uuid_token:
+      - "eyJleHAiOjk5MDAwMDAwMDB9.signature"
+    expired_token:
+      - "eyJ1c2VyIjoidXVpZCIsImV4cCI6MTcwOTQwMjYyNn0.signature"
+    not_expired_token:
+      - "eyJ1c2VyIjoidXVpZCIsImV4cCI6OTkwMDAwMDAwMH0.signature"
+
+  collection:
+    collectionUUID: "collection uuid"
+
+  article:
+    # user: "test user uuid"
+    collectionUUID: "collection uuid"
+    link: "test article link"
+
+  social:
+    user1:
+      access_token: "access token"
+      refresh_token: "refresh token"
+      uuid: "uuid"
+    user2:
+      access_token: "access token"
+      refresh_token: "refresh token"
+      uuid: "uuid"
+    user3:
+      access_token: "access token"
+      refresh_token: "refresh token"
+      uuid: "uuid"
